@@ -13,6 +13,7 @@ import {
 } from "../../../redux/actions/alacarte-config/pos-setting"
 import {setSessionUri} from "../../../codes/function"
 import Spinner from "../../../components/formLoading"
+import ModalAPIResult from "../../modal/modalAPIResult"
 
 class POSSettings extends React.Component {
   state = {
@@ -56,6 +57,9 @@ class POSSettings extends React.Component {
     await this.props.getInitialData();
     this.setState({loading: false});
   }
+  updatePOSSettings = async (obj) => {
+    await this.props.updateData(obj);
+  }
   render() {
     let {
       dataSysInfo,
@@ -89,8 +93,18 @@ class POSSettings extends React.Component {
               parsedFilter={queryString.parse(this.props.location.search)}
               products={dataProduct}
               saleTypes={dataSaleType}
+              dataPOSSetting={dataPOSSetting}
+              updatePOSSettings={this.updatePOSSettings}
             />
-            <SysInfo />
+            <SysInfo
+              dataSysInfo={dataSysInfo}
+            />
+            <ModalAPIResult
+              show={showModalApi}
+              status={statusAPI}
+              msg={messageAPI}
+              time={timeAPI}
+            />
             </>
           )
           }

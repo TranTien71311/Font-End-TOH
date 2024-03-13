@@ -14,10 +14,12 @@
 .sales-card {
   // img left
   .img-left {
-    width: 200px;
+    width: 100%;
+    height: 37.5rem;
     position: absolute;
     top: 0;
     left: 0;
+    border-radius: 10px;
   }
   // img right
   .img-right {
@@ -29,7 +31,6 @@
 
   // backgound color to card
   &.bg-analytics {
-    background: linear-gradient(118deg, rgba($primary, 1), rgba($primary, 0.7));
     .avatar {
       margin-bottom: 2rem;
       svg {
@@ -37,6 +38,7 @@
         width: 28px;
       }
     }
+
   }
 }
 

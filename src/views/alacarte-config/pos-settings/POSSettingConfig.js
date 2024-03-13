@@ -8,24 +8,26 @@ import {
   Input,
   Form,
   Button,
-  Label
+  Label,
+  Spinner
 } from "reactstrap"
 import Select from "react-select"
-
-const colourOptions = [
-  { value: "ocean", label: "Ocean" },
-  { value: "blue", label: "Blue" },
-  { value: "purple", label: "Purple" },
-  { value: "red", label: "Red" },
-  { value: "orange", label: "Orange" }
-]
 
 class POSSettingConfig extends React.Component {
   state = {
     products: this.props.products,
     saleTypes: this.props.saleTypes,
-    SaleType: 1,
-    ProductComment: 1,
+    SaleType: this.props.dataPOSSetting.SaleType,
+    saleTypeSelected: this.props.saleTypes.find(x=>x.value === this.props.dataPOSSetting.SaleType),
+    productSelected: this.props.products.find(x=>x.value === this.props.dataPOSSetting.ProductComment),
+    ProductComment: this.props.dataPOSSetting.ProductComment,
+    StationNum: this.props.dataPOSSetting.StationNum,
+    RevCenter: this.props.dataPOSSetting.RevCenter,
+    TableNum: this.props.dataPOSSetting.TableNum,
+    MemberCode: this.props.dataPOSSetting.MemberCode,
+    dataPOSSetting: this.props.dataPOSSetting,
+    SectionNum: this.props.dataPOSSetting.SectionNum,
+    loadingUpdate: false
   }
   componentDidUpdate(prevProps, prevState) {
     if ((this.props.products !== null && prevProps.products === null)
@@ -43,12 +45,44 @@ class POSSettingConfig extends React.Component {
       this.setState(
         {
           saleTypes: this.props.saleTypes,
+          saleTypeSelected: this.props.saleTypes[0]
         }
       );
     }
+    if ((this.props.dataPOSSetting !== null && prevProps.dataPOSSetting === null)
+    || ( this.props.dataPOSSetting !== prevState.dataPOSSetting)
+    ) {
+      this.setState(
+        {
+          dataPOSSetting: this.props.dataPOSSetting,
+          SaleType: this.props.dataPOSSetting.SaleType,
+          ProductComment: this.props.dataPOSSetting.ProductComment,
+          StationNum: this.props.dataPOSSetting.StationNum,
+          RevCenter: this.props.dataPOSSetting.RevCenter,
+          TableNum: this.props.dataPOSSetting.TableNum,
+          MemberCode: this.props.dataPOSSetting.MemberCode,
+          saleTypeSelected: this.props.saleTypes.find(x=>x.value === this.props.dataPOSSetting.SaleType)
+        }
+      );
+    }
+
+  }
+  handleSaveUpdata = async () => {
+    this.setState({loadingUpdate: true});
+    let obj = {
+      SaleType: this.state.SaleType,
+      ProductComment : this.state.ProductComment,
+      StationNum: this.state.StationNum,
+      RevCenter: this.state.RevCenter,
+      TableNum: this.state.TableNum,
+      MemberCode: this.state.MemberCode,
+      SectionNum: this.state.SectionNum
+    }
+    await this.props.updatePOSSettings(obj);
+    this.setState({loadingUpdate: false});
   }
   render() {
-    let { products , saleTypes} = this.state
+    let { products , saleTypes,saleTypeSelected,productSelected, StationNum,SectionNum, RevCenter, TableNum, MemberCode, loadingUpdate} = this.state
     return (
       <Card>
         <CardBody>
@@ -58,10 +92,16 @@ class POSSettingConfig extends React.Component {
                 <Label for="nameMulti">Station Num</Label>
                 <FormGroup className="form-label-group">
                   <Input
-                    type="text"
+                    type="number"
                     name="name"
-                    id="nameMulti"
+                    id={StationNum}
                     placeholder="Station Num"
+                    value={StationNum}
+                    onChange={
+                      (e)=>{
+                        this.setState({StationNum: e.target.value})
+                      }
+                    }
                   />
                 </FormGroup>
               </Col>
@@ -71,50 +111,30 @@ class POSSettingConfig extends React.Component {
                   <Select
                   className="React"
                   classNamePrefix="select"
-                  defaultValue={saleTypes[0]}
+                  defaultValue={saleTypeSelected}
                   name="color"
                   options={saleTypes}
                   onChange={
                     (selected) => {
-                      this.setState({SaleType: selected.value});
+                      this.setState({SaleType: selected.value})
                     }
                   }
                   />
                 </FormGroup>
               </Col>
               <Col md="6" sm="12">
-                <Label for="cityMulti">Who start</Label>
+                <Label for="cityMulti">Member default (code)</Label>
                 <FormGroup className="form-label-group">
                   <Input
-                    type="text"
+                    type="number"
                     name="city"
-                    id="whoStart"
-                    placeholder="Who start"
+                    id={MemberCode}
+                    placeholder="Member default (code)"
+                    value={MemberCode}
+                    onChange={(e)=>{
+                      this.setState({MemberCode: e.target.value})
+                    }}
                   />
-                </FormGroup>
-              </Col>
-              <Col md="6" sm="12">
-                <Label for="lastNameMulti">Order type</Label>
-                <FormGroup className="form-label-group">
-                  <Select
-                  className="React"
-                  classNamePrefix="select"
-                  defaultValue={colourOptions[0]}
-                  name="color"
-                  options={colourOptions}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md="6" sm="12">
-                <Label for="CompanyMulti">RevCenter</Label>
-                <FormGroup className="form-label-group">
-                  <Input
-                    type="text"
-                    name="company"
-                    id="RevCenter"
-                    placeholder="RevCenter"
-                  />
-
                 </FormGroup>
               </Col>
               <Col md="6" sm="12">
@@ -123,7 +143,7 @@ class POSSettingConfig extends React.Component {
                   <Select
                   className="React"
                   classNamePrefix="select"
-                  defaultValue={products[0]}
+                  defaultValue={productSelected}
                   name="color"
                   options={products}
                   onChange={
@@ -135,13 +155,17 @@ class POSSettingConfig extends React.Component {
                 </FormGroup>
               </Col>
               <Col md="6" sm="12">
-                <Label for="CompanyMulti">Section Num</Label>
+                <Label for="CompanyMulti">RevCenter</Label>
                 <FormGroup className="form-label-group">
                   <Input
-                    type="text"
+                    type="number"
                     name="company"
-                    id="sectionNum"
-                    placeholder="Section Num"
+                    id="RevCenter"
+                    placeholder="RevCenter"
+                    value={RevCenter}
+                    onChange={(e)=>{
+                      this.setState({RevCenter: e.target.value})
+                    }}
                   />
 
                 </FormGroup>
@@ -150,21 +174,53 @@ class POSSettingConfig extends React.Component {
                 <Label for="CompanyMulti">Table Num</Label>
                 <FormGroup className="form-label-group">
                   <Input
-                    type="text"
+                    type="number"
                     name="company"
                     id="tableNum"
                     placeholder="Table Num"
+                    value={TableNum}
+                    onChange={(e)=>{
+                      this.setState({TableNum: e.target.value})
+                    }}
                   />
                 </FormGroup>
+              </Col>
+              <Col md="6" sm="12">
+                <Label for="CompanyMulti">Section Num</Label>
+                <FormGroup className="form-label-group">
+                  <Input
+                    type="number"
+                    name="company"
+                    id="sectionNum"
+                    placeholder="Section Num"
+                    value={SectionNum}
+                    onChange={(e)=>{
+                      this.setState({SectionNum: e.target.value})
+                    }}
+                  />
+
+                </FormGroup>
+              </Col>
+              <Col md="6" sm="12">
+
               </Col>
               <Col sm="12">
                 <FormGroup className="form-label-group">
                   <Button.Ripple
                     color="primary"
-                    type="submit"
                     className="mr-1 mb-1"
-                    onClick={e => e.preventDefault()}
+                    onClick={() => {
+                      if(!loadingUpdate){
+                        this.handleSaveUpdata();
+                      }
+                    }}
                   >
+                    {
+                      loadingUpdate ?
+                      (
+                        <Spinner color="white" size="sm" type="grow" className="mr-1"/>
+                      ): null
+                    }
                     Save
                   </Button.Ripple>
                 </FormGroup>

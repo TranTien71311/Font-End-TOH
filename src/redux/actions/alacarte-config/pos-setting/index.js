@@ -1,16 +1,6 @@
 
 import {fetchAPI, putAPI} from "../../../../Api/SiteApi/api"
 
-const updateAction = (updateObj, stateData) => {
-  let index = stateData.findIndex(x=>x.UniqueID === updateObj.UniqueID);
-  if(index === -1){
-    return stateData;
-  }
-  if(stateData[index].Translations !== updateObj.Translations){
-    stateData[index]["Translations"] = updateObj.Translations;
-  }
-  return stateData;
-}
 
 export const getInitialData = () => {
   return async dispatch => {
@@ -18,6 +8,7 @@ export const getInitialData = () => {
       fetchAPI("/api/POSProducts"),
       fetchAPI("/api/POSSysInfo"),
       fetchAPI("/api/POSSaleTypes"),
+      fetchAPI("/api/POSSettings")
     ]).then(
       response => {
         let i = 0;
@@ -25,13 +16,8 @@ export const getInitialData = () => {
           if(result.Status !== 200){
             dispatch({type: "SHOW_ERROR_API_POSSETTING", status: result.Status, message: result.Message})
           }else{
-            if(i == 0){
-              dispatch({ type: "APPEND_DATA_PRODUCT_POSSETTING", data: result })
-            }else if(i == 1){
-              dispatch({ type: "APPEND_DATA_SYSINFO", data: result })
-            }else{
-              dispatch({ type: "APPEND_DATA_SALETYPE", data: result })
-            }
+            let type = ["APPEND_DATA_PRODUCT_POSSETTING", "APPEND_DATA_SYSINFO", "APPEND_DATA_SALETYPE", "APPEND_DATA_POSSETTING"];
+            dispatch({ type: type[i], data: result })
           }
           i++;
         }
@@ -45,27 +31,20 @@ export const getInitialData = () => {
   }
 }
 
-export const updateData = (obj, dataState) => {
-  if(obj.UniqueID === null || obj.UniqueID === ""){
-    return dispatch => {
-      dispatch({type: "SHOW_ERROR_API_FORCEDCHOICE", status: -1, message: "UniqueID can not be empty"})
-    }
-  }
+export const updateData = (obj) => {
   return async dispatch => {
-    dispatch({ type: "PENDING_API_FORCEDCHOICE"})
-    await putAPI("/api/POSForcedChoices",[obj]).then(
+    await putAPI("/api/POSSettings",obj).then(
       response => {
         if(response.Status === 200){
-          let dataResult = updateAction(response.Data[0], dataState);
-          dispatch({ type: "UPDATE_DATA_FORCEDCHOICE", data: dataResult, status: response.Status, message: response.Message })
+          dispatch({ type: "UPDATE_DATA_POSSETTING", data: response.Data, status: response.Status, message: "Update successfully!"});
         }
         else{
-          dispatch({type: "SHOW_ERROR_API_FORCEDCHOICE", status: response.Status, message: response.Error[0].Message.Message})
+          dispatch({type: "SHOW_ERROR_API_POSSETTING", status: response.Status, message: response.Error[0].Message.Message})
         }
       }
     ).catch(
       error => {
-        dispatch({type: "SHOW_ERROR_API_FORCEDCHOICE", status: -1, message: error.message})
+        dispatch({type: "SHOW_ERROR_API_POSSETTING", status: -1, message: error.message})
       }
     )
   }

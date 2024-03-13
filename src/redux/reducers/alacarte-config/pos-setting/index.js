@@ -23,22 +23,19 @@ const SetupPOSSettingReducer = (state = initialState, action) => {
         timeAPI: time
       }
     case "APPEND_DATA_POSSETTING":
-      let result = [];
-      action.data.Data.forEach(element => {
-        let item = {
-          SaleType: element.SaleType,
-          ProductComment: element.ProductComment,
-          StationNum: element.StationNum,
-          RevCenter: element.RevCenter,
-          SectionNum: element.SectionNum,
-          TableNum: element.TableNum
-        }
-        result.push(item);
-      });
       return {
         ...state,
         showModalApi:false,
-        dataPOSSetting: result
+        dataPOSSetting: action.data.Data[0]
+      }
+    case "UPDATE_DATA_POSSETTING":
+      return {
+        ...state,
+        showModalApi: true,
+        statusAPI: action.status,
+        messageAPI: action.message,
+        timeAPI: time,
+        dataPOSSetting: action.data
       }
     case "APPEND_DATA_SYSINFO":
       let sysinfo = [];
@@ -67,7 +64,7 @@ const SetupPOSSettingReducer = (state = initialState, action) => {
 
       return {
         ...state,
-        dataSysInfo: sysinfo
+        dataSysInfo: sysinfo[0]
       }
     case "APPEND_DATA_PRODUCT_POSSETTING":
       let product = [];

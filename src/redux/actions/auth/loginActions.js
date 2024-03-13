@@ -1,28 +1,21 @@
 import {postAPI} from "../../../Api/SiteApi/api"
 import { history } from "../../../history"
 import { getSession } from "../../../codes/function"
+import jwt from "jsonwebtoken"
 
 const setLocalSession = (data) => {
-  console.log("a");
-    let str = JSON.stringify(data);
-    localStorage.setItem("loginSession", str);
+    localStorage.setItem("loginSession", data);
 }
 
 export const loginWithSession = () => {
   let loginSessionStr = localStorage.getItem("loginSession");
-  let dataPost = JSON.parse(loginSessionStr);
+  let dataPost = {
+    AccessToken: loginSessionStr
+  }
   return async dispatch => {
     await postAPI("/api/login", dataPost).then(
       response => {
-        if(dataPost.TypeLogin === 0){
-          dispatch({type:"LOGIN_WITH_USERNAME", status: response.Status, message: response.Message, payload: response.Data});
-        }
-        else if(dataPost.TypeLogin === 1){
-          dispatch({type:"LOGIN_WITH_EMAIL", status: response.Status, message: response.Message, payload: response.Data});
-        }
-        else if(dataPost.TypeLogin === 2){
-          dispatch({type:"LOGIN_WITH_EMPLOYEE_CODE", status: response.Status, message: response.Message, payload: response.Data});
-        }
+        dispatch({type:"LOGIN_WITH_USERNAME", status: response.Status, message: response.Message, payload: response.Data});
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
         if(getSession("uriSession") !== null && getSession("uriSession") !== "")
@@ -44,11 +37,19 @@ export const loginWithSession = () => {
 }
 
 export const loginWithUsername = (data) => {
-  let dataPost = {
-    UserName: data.username,
-    Password: data.password,
-    TypeLogin: 0
-  }
+  const accessToken = jwt.sign(
+    {
+      UserName: data.username,
+      Password: data.password,
+      TypeLogin: 0
+    },
+    "221278",
+    {expiresIn: 8000}
+    )
+    let dataPost = {
+      AccessToken: accessToken
+    }
+    console.log(accessToken);
   return async dispatch => {
     await postAPI("/api/login", dataPost).then(
       response => {
@@ -56,7 +57,7 @@ export const loginWithUsername = (data) => {
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
         if(data.remember){
-          setLocalSession(dataPost);
+          setLocalSession(accessToken);
         }
        }
       }
@@ -69,11 +70,18 @@ export const loginWithUsername = (data) => {
 }
 
 export const loginWithEmail = (data) => {
-  let dataPost = {
-    Email: data.email,
-    Password: data.password,
-    TypeLogin: 1
-  }
+  const accessToken = jwt.sign(
+    {
+      Email: data.email,
+      Password: data.password,
+      TypeLogin: 1
+    },
+    "221278",
+    {expiresIn: 8000}
+    )
+    let dataPost = {
+      AccessToken: accessToken
+    }
   return async dispatch => {
     await postAPI("/api/login", dataPost).then(
       response => {
@@ -81,7 +89,7 @@ export const loginWithEmail = (data) => {
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
         if(data.remember){
-          setLocalSession(dataPost);
+          setLocalSession(accessToken);
         }
        }
       }
@@ -94,10 +102,17 @@ export const loginWithEmail = (data) => {
 }
 
 export const loginWithEmployeeCode = (data) => {
-  let dataPost = {
-    EmployeeCode: data.code,
-    TypeLogin: 2
-  }
+  const accessToken = jwt.sign(
+    {
+      EmployeeCode: data.code,
+      TypeLogin: 2
+    },
+    "221278",
+    {expiresIn: 8000}
+    )
+    let dataPost = {
+      AccessToken: accessToken
+    }
   return async dispatch => {
     await postAPI("/api/login", dataPost).then(
       response => {
@@ -105,7 +120,7 @@ export const loginWithEmployeeCode = (data) => {
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
         if(data.remember){
-          setLocalSession(dataPost);
+          setLocalSession(accessToken);
         }
        }
       }
