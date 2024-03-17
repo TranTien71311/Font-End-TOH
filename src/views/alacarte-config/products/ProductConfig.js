@@ -74,7 +74,7 @@ const ActionsComponent = props => {
       className="cursor-pointer ml-2 text-primary"
       size={20}
       onClick={() => {
-        return props.editRow(props.row)
+        props.editRow(props.row)
       }}
       id="UncontrolledEdit"
     />
@@ -129,7 +129,7 @@ class ProductsConfig extends Component {
         name: "Image",
         selector: "Image",
         minWidth: "100px",
-        cell: row => <img src={ (row.Image !== "" && row.Image !== null) ? ("https://localhost:44351" + row.Image) : require("../../../assets/img/elements/no-image.png")} height="100" alt={row.ProductName} />
+        cell: row => <img className="pt-1 pb-1 pl-1 pr-1" src={ (row.Image !== "" && row.Image !== null) ? ("https://localhost:44351" + row.Image) : require("../../../assets/img/elements/no-image.png")} height="100" alt={row.ProductName} />
       },
       {
         name: "Name",
@@ -217,7 +217,6 @@ class ProductsConfig extends Component {
         data: props.product.data,
         allData: props.product.filteredData,
         totalPages: props.product.totalPages,
-        currentPage: parseInt(props.parsedFilter.page) - 1,
         rowsPerPage: parseInt(props.parsedFilter.perPage),
         totalRecords: props.product.totalRecords,
         sortIndex: props.product.sortIndex,
@@ -234,12 +233,13 @@ class ProductsConfig extends Component {
 
   componentDidMount() {
     setSessionUri(window.location.pathname);
-    this.initalData(1000);
+    this.initalData(100, this.state.currentPage);
   }
-  initalData = async (page) => {
+  initalData = async (page,num) => {
     this.setState({loading: true});
-    await this.props.getInitialData(page);
+    await this.props.getInitialData(page, num);
     this.setState({loading: false});
+    window.scrollTo(0, 0);
   }
   handleFilter = e => {
     this.setState({ value: e.target.value })
@@ -256,11 +256,12 @@ class ProductsConfig extends Component {
     }
   }
   handleEdit = obj => {
+
     this.setState({currentData: obj})
     this.handleSidebar(true);
   }
-  handlePagination = (page) => {
-    this.props.getInitialData(1000);
+  handlePagination = (num) => {
+    this.initalData(100, num);
   }
   toggleModalPublic = () => {
     this.setState({showModalPublic: !this.state.showModalPublic, loadingPublic: false})
@@ -333,11 +334,12 @@ class ProductsConfig extends Component {
               containerClassName="vx-pagination separated-pagination pagination-end pagination-sm mb-0 mt-2"
               activeClassName="active"
               forcePage={
-                this.props.parsedFilter.page
-                  ? parseInt(this.props.parsedFilter.page - 1)
-                  : 0
+                this.state.currentPage
               }
-              onPageChange={page => this.handlePagination(page)}
+              onPageChange={page => {
+                this.setState({currentPage: page.selected})
+                this.handlePagination(page.selected)
+                }}
             />
           )}
           noHeader

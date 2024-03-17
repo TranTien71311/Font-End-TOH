@@ -16,12 +16,24 @@ const initialState = {
   showModalApi: false,
   statusAPI: 0,
   messageAPI: "",
-  timeAPI:""
+  timeAPI:"",
+  roomSelected: {},
+  wardSelected: {}
 }
 
 const OrderAlacarteReducer = (state = initialState, action) => {
   let time = new Date();
   switch (action.type) {
+    case "UPDATE_ROOM_SELECTED":
+      return  {
+          ...state,
+          roomSelected: action.obj
+        }
+    case "UPDATE_WARD_SELECTED":
+      return  {
+          ...state,
+          wardSelected: action.obj
+        }
     case "SHOW_ERROR_API_ORDER_ALACARTE":
       return {
         ...state,
@@ -98,7 +110,8 @@ const OrderAlacarteReducer = (state = initialState, action) => {
           DischargeDate: element.DischargeDate ,
           IsActive: element.IsActive ,
           CreatedDate: element.CreatedDate ,
-          ModifiedDate: element.ModifiedDate
+          ModifiedDate: element.ModifiedDate,
+          Transactions: element.TransactionAlacarte
         }
         patients.push(item);
       });

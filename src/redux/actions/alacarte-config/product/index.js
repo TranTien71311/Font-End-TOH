@@ -39,14 +39,14 @@ const updatePublic = (arr, stateData) => {
   return stateData;
 }
 
-export const getInitialData = (pageSize) => {
+export const getInitialData = (pageSize, pageNum) => {
   let reportCatStr = getSession("reportCat");
   let reportCat = JSON.parse(reportCatStr);
+
   if(reportCatStr !== "" && reportCatStr !== null){
     return async dispatch => {
-      console.log('a');
       await Promise.all([
-        fetchAPI("/api/POSProducts?PageSize="+ pageSize +"&PageNum=0&ReportNo="+ reportCat.ReportNo +""),
+        fetchAPI("/api/POSProducts?PageSize="+ pageSize +"&PageNum="+ pageNum +"&ReportNo="+ reportCat.ReportNo +""),
         fetchAPI("/api/Translations")
       ]).then(
         response => {
@@ -88,7 +88,6 @@ export const updateData = (obj, dataState) => {
       dispatch({type: "SHOW_ERROR_API_PRODUCT", status: -1, message: "Product can not be empty"})
     }
   }
-  console.log(obj);
   return async dispatch => {
     await putAPI("/api/POSProducts",[obj]).then(
       response => {

@@ -5,7 +5,15 @@ import Ward from "./Ward"
 import Patient from "./Patient"
 import TaskSidebar from "./TaskSidebar"
 import "../../../../assets/scss/pages/app-todo.scss"
-import { getInitialData, setPatientSelected, updateShipTransaction, getTransactionDetail} from "../../../../redux/actions/alacarte-order/get-data"
+import {
+  getInitialData,
+  setPatientSelected,
+  updateShipTransaction,
+  getTransactionDetail,
+  getPatientByRoom,
+  setRoomSelected,
+  setWardSelected
+} from "../../../../redux/actions/alacarte-order/get-data"
 import { connect } from "react-redux"
 import {setSessionUri} from "../../../../codes/function"
 import Spinner from "../../../../components/formLoading"
@@ -29,7 +37,10 @@ class Config extends React.Component {
     messageAPI: "",
     loadingUpdate: false,
     timeAPI: "",
-    transactionDetail: []
+    transactionDetail: [],
+    wardSelected : {},
+    roomSelected: {},
+    dataRoomShow: []
   }
   static getDerivedStateFromProps(props, state) {
     if (
@@ -37,21 +48,51 @@ class Config extends React.Component {
       || props.dataOrders.dataRoom.length !== state.dataRoom.length
       || props.dataOrders.dataPatient !== state.dataPatient
       || props.dataOrders.transactionDetail !== state.transactionDetail
+      || props.dataOrders.wardSelected !== state.wardSelected
+      || props.dataOrders.roomSelected !== state.roomSelected
     ) {
       return {
         dataWard: props.dataOrders.dataWard,
         dataRoom: props.dataOrders.dataRoom,
         dataPatient: props.dataOrders.dataPatient,
-        transactionDetail: props.dataOrders.transactionDetail
+        transactionDetail: props.dataOrders.transactionDetail,
+        wardSelected: props.dataOrders.wardSelected,
+        roomSelected: props.dataOrders.roomSelected
       }
     }
     return null
   }
 
   initalData = async () => {
+
     this.setState({loading: true});
     await this.props.getInitialData();
+    if(this.state.dataWard.length !== 0 && Object.keys(this.state.wardSelected).length === 0){
+      this.setWardSelected(this.state.dataWard[0])
+    }
+    else{
+      let dataShow = this.state.dataRoom.filter(x=>x.WardID === this.state.wardSelected.WardID);
+      this.setState({dataRoomShow: dataShow});
+    }
+    if(this.state.dataRoom.length !== 0 && Object.keys(this.state.roomSelected).length !== 0){
+      this.getPatient(this.state.roomSelected.RoomID);
+    }
     this.setState({loading: false});
+  }
+  setWardSelected = (obj) => {
+    this.props.setWardSelected(obj);
+    let dataShow = this.state.dataRoom.filter(x=>x.WardID === obj.WardID);
+    this.setState({dataRoomShow: dataShow});
+    // if(dataShow.length !== 0 && Object.keys(this.state.roomSelected).length === 0){
+    //   this.setRoomSelected(dataShow[0]);
+    // }
+  }
+  setRoomSelected = (obj) => {
+    this.props.setRoomSelected(obj);
+  }
+  getPatient = async (roomID) => {
+    await this.props.getPatientByRoom(roomID);
+    this.setState({dataPatientFilter: this.state.dataPatient})
   }
   componentDidMount() {
     mql.addListener(this.mediaQueryChanged)
@@ -135,6 +176,12 @@ class Config extends React.Component {
                   dataWards={this.state.dataWard}
                   dataRooms={this.state.dataRoom}
                   filterPatient={this.filterPatient}
+                  getPatient={this.getPatient}
+                  wardSelected={this.state.wardSelected}
+                  roomSelected={this.state.roomSelected}
+                  setWardSelected={this.setWardSelected}
+                  setRoomSelected={this.setRoomSelected}
+                  dataRoomShow={this.state.dataRoomShow}
                 />
               }
               docked={this.state.sidebarDocked}
@@ -185,4 +232,14 @@ const mapStateToProps = state => {
     dataOrders: state.dataOrder
   }
 }
-export default connect(mapStateToProps, { getInitialData,setPatientSelected,updateShipTransaction,getTransactionDetail})(Config)
+export default connect(mapStateToProps,
+  {
+    getInitialData,
+    setPatientSelected,
+    updateShipTransaction,
+    getTransactionDetail,
+    getPatientByRoom,
+    setRoomSelected,
+    setWardSelected
+  }
+  )(Config)

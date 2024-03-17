@@ -35,7 +35,8 @@ class ProductsSidebar extends Component {
             TranslationType: 0,
             TranslationName: element.TranslationName,
             ProductNum: this.props.data.ProductNum,
-            TranslationText: this.props.data.Tranlations[index].TranslationText
+            TranslationText: this.props.data.Tranlations[index].TranslationText,
+            Descript: this.props.data.Tranlations[index].Descript
           })
         }else{
           result.push({
@@ -43,7 +44,8 @@ class ProductsSidebar extends Component {
             TranslationType: 0,
             TranslationName: element.TranslationName,
             ProductNum: this.props.data.ProductNum,
-            TranslationText: ""
+            TranslationText: "",
+            Descript: ""
           })
         }
       });
@@ -92,6 +94,37 @@ class ProductsSidebar extends Component {
   render() {
     let { show, data, handleSidebar, loadingUpdate } = this.props
     let { translationProducts, product, img, index, timeStartOrder, timeEndOrder} = this.state
+    let renderTranslations = translationProducts.map((translation, i) => {
+      return (
+
+        <FormGroup key={translation.TranslationID}>
+          <Label for="data-name">{translation.TranslationName}</Label>
+          <Input
+            type="text"
+            value={translation.TranslationText}
+            placeholder={translation.TranslationName}
+            onChange={e => {
+              translation.TranslationText = e.target.value;
+              translationProducts[i]["TranslationText"] = translation.TranslationText;
+              this.setState({ translationProducts: translationProducts})
+              }
+            }
+          />
+          <Input
+            className="mt-1"
+            type="textarea"
+            value={translation.Descript}
+            placeholder={translation.TranslationName}
+            onChange={e => {
+              translation.Descript = e.target.value;
+              translationProducts[i]["Descript"] = translation.Descript;
+              this.setState({ translationProducts: translationProducts})
+              }
+            }
+          />
+        </FormGroup>
+      )
+    })
     return (
       <div
         className={classnames("data-list-sidebar", {
@@ -133,23 +166,7 @@ class ProductsSidebar extends Component {
                 </Button>
               </div>
             </FormGroup>
-          {translationProducts.map((translation, i) => (
-            <FormGroup key={translation.TranslationID}>
-              <Label for="data-name">{translation.TranslationName}</Label>
-              <Input
-                type="text"
-                value={translation.TranslationText}
-                placeholder={translation.TranslationName}
-                onChange={e => {
-                  translation.TranslationText = e.target.value;
-                  translationProducts[i]["TranslationText"] = translation.TranslationText;
-                  this.setState({ translationProducts: translationProducts})
-                  }
-                }
-              />
-
-            </FormGroup>
-          ))}
+          {renderTranslations}
           <FormGroup key="startTimeOrder">
               <Label for="data-name">Order time start(E.g: 09:00)</Label>
               <Flatpickr

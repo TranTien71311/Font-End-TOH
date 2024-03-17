@@ -1,19 +1,16 @@
 
-import { error } from "jquery";
 import {fetchAPI, putAPI} from "../../../../Api/SiteApi/api"
 
 export const getInitialData = () => {
   return async dispatch => {
     await Promise.all([
       fetchAPI("/api/Wards?IsActive=true"),
-      fetchAPI("/api/Rooms?IsActive=true"),
-      fetchAPI("/api/PatientDemographics?IsActive=true"),
-      fetchAPI("/api/TransactionAlacarte?OrderBy=DESC")
+      fetchAPI("/api/Rooms?IsActive=true")
     ]).then(
       response => {
 
         let i = 0;
-        let types = ["APPEND_DATA_WARD_ALACARTE", "APPEND_DATA_ROOM_ALACARTE", "APPEND_DATA_PATIENT_ALACARTE", "APPEND_DATA_TRANSACTION_ALACARTE"]
+        let types = ["APPEND_DATA_WARD_ALACARTE", "APPEND_DATA_ROOM_ALACARTE"]
         for (const result of response) {
           if(result.Status !== 200){
             dispatch({type: "SHOW_ERROR_API_ALACARTE", status: result.Status, message: result.Message})
@@ -64,4 +61,26 @@ export const getTransactionDetail = (transCode) => {
       }
     )
   }
+}
+
+export const getPatientByRoom = (roomID) => {
+  return async dispatch => {
+    await fetchAPI("/api/PatientDemographics?RoomID="+roomID+"").then(
+      result => {
+        dispatch({type:"APPEND_DATA_PATIENT_ALACARTE", data: result})
+      }
+    ).catch(
+      error => {
+        console.log(error);
+      }
+    )
+  }
+}
+
+export const setRoomSelected = obj => {
+  return dispatch => dispatch({ type: "UPDATE_ROOM_SELECTED", obj })
+}
+
+export const setWardSelected = obj => {
+  return dispatch => dispatch({ type: "UPDATE_WARD_SELECTED", obj })
 }

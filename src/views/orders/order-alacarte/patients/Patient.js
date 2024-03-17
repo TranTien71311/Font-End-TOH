@@ -36,7 +36,6 @@ class Patient extends React.Component {
     if ((this.props.dataPatients !== null && prevProps.dataPatients === null)
     || (this.props.dataPatients !== null && prevState !== null && this.props.dataPatients !== prevState.patients)
     ) {
-      console.log('a')
       this.setState({ patients: this.props.dataPatients});
     }
     if ((this.props.transactionDetail !== null && prevProps.transactionDetail === null)
