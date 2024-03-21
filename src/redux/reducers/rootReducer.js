@@ -14,6 +14,7 @@ import dataPOSProduct from "./alacarte-config/product/"
 import dataPOSSetting from "./alacarte-config/pos-setting/"
 import dataWard from "./app-data/ward"
 import dataOrder from "./alacarte-order"
+import dataTranslation from "./app-data/translation"
 
 const rootReducer = combineReducers({
   calendar: calenderReducer,
@@ -30,7 +31,8 @@ const rootReducer = combineReducers({
   dataPOSProduct: dataPOSProduct,
   dataPOSSetting: dataPOSSetting,
   dataWard: dataWard,
-  dataOrder: dataOrder
+  dataOrder: dataOrder,
+  dataTranslation: dataTranslation
 })
 
 export default rootReducer

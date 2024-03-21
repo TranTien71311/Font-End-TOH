@@ -1,4 +1,4 @@
-import {postAPI} from "../../../Api/SiteApi/api"
+import {postAPI, fetchAPI} from "../../../Api/SiteApi/api"
 import { history } from "../../../history"
 import { getSession } from "../../../codes/function"
 import jwt from "jsonwebtoken"
@@ -7,17 +7,33 @@ const setLocalSession = (data) => {
     localStorage.setItem("loginSession", data);
 }
 
+
 export const loginWithSession = () => {
   let loginSessionStr = localStorage.getItem("loginSession");
   let dataPost = {
     AccessToken: loginSessionStr
   }
+
   return async dispatch => {
+    await fetchAPI("/api/Translations?IsActive=true").then(
+      response => {
+       if(response.Status === 200){
+        dispatch({type:"APPEND_DATA_TRANSLATION", data: response});
+       }else {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: response.Message});
+       }
+      }
+    ).catch(
+      error => {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: error.message});
+      }
+    )
     await postAPI("/api/login", dataPost).then(
       response => {
         dispatch({type:"LOGIN_WITH_USERNAME", status: response.Status, message: response.Message, payload: response.Data});
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
+
         if(getSession("uriSession") !== null && getSession("uriSession") !== "")
         {
           let uri = getSession("uriSession");
@@ -49,11 +65,25 @@ export const loginWithUsername = (data) => {
     let dataPost = {
       AccessToken: accessToken
     }
-    console.log(accessToken);
-  return async dispatch => {
+    return async dispatch => {
+    await fetchAPI("/api/Translations?IsActive=true").then(
+      response => {
+        if(response.Status === 200){
+
+        dispatch({type:"APPEND_DATA_TRANSLATION", data: response});
+        }else {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: response.Message});
+        }
+      }
+    ).catch(
+      error => {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: error.message});
+      }
+    )
     await postAPI("/api/login", dataPost).then(
       response => {
         dispatch({type:"LOGIN_WITH_USERNAME", status: response.Status, message: response.Message, payload: response.Data});
+
        if(response.Status === 200){
         dispatch({type:"CHANGE_ROLE", userRole: response.Data.Permission});
         if(data.remember){
@@ -83,6 +113,20 @@ export const loginWithEmail = (data) => {
       AccessToken: accessToken
     }
   return async dispatch => {
+    await fetchAPI("/api/Translations?IsActive=true").then(
+      response => {
+       if(response.Status === 200){
+
+        dispatch({type:"APPEND_DATA_TRANSLATION", data: response});
+       }else {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: response.Message});
+       }
+      }
+    ).catch(
+      error => {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: error.message});
+      }
+    )
     await postAPI("/api/login", dataPost).then(
       response => {
         dispatch({type:"LOGIN_WITH_EMAIL", status: response.Status, message: response.Message, payload: response.Data});
@@ -114,6 +158,20 @@ export const loginWithEmployeeCode = (data) => {
       AccessToken: accessToken
     }
   return async dispatch => {
+    await fetchAPI("/api/Translations?IsActive=true").then(
+      response => {
+       if(response.Status === 200){
+
+        dispatch({type:"APPEND_DATA_TRANSLATION", data: response});
+       }else {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: response.Message});
+       }
+      }
+    ).catch(
+      error => {
+        dispatch({type:"SHOW_ERROR_API_TRANSLATION", status: 0, message: error.message});
+      }
+    )
     await postAPI("/api/login", dataPost).then(
       response => {
         dispatch({type:"LOGIN_WITH_EMPLOYEE_CODE", status: response.Status, message: response.Message, payload: response.Data});

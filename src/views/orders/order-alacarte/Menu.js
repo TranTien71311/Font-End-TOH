@@ -28,6 +28,7 @@ class MenuAlacarte extends React.Component {
     loadingUpdate: false,
     timeAPI: "",
     loadingGetProduct: false,
+    langue: {}
   }
   static getDerivedStateFromProps(props, state) {
     if (
@@ -38,6 +39,7 @@ class MenuAlacarte extends React.Component {
       || props.dataOrders.dataForcedChoices !== state.dataForcedChoices
       || props.dataOrders.dataSysInfo !== state.sysInfo
       || props.dataOrders.dataProductInReport !== state.dataProductInReport
+      || props.langue !== state.langue
     ) {
       return {
         patientSelected: props.dataOrders.patientSelected,
@@ -46,7 +48,8 @@ class MenuAlacarte extends React.Component {
         dataProducts: props.dataOrders.dataProducts,
         dataQuestions: props.dataOrders.dataQuestions,
         dataForcedChoices: props.dataOrders.dataForcedChoices,
-        dataProductInReport: props.dataOrders.dataProductInReport
+        dataProductInReport: props.dataOrders.dataProductInReport,
+        langue: props.langue
       }
     }
     return null
@@ -98,6 +101,7 @@ class MenuAlacarte extends React.Component {
       dataForcedChoices,
       sysInfo,
       dataProductInReport,
+      langue,
       statusAPI
     } = this.state
     return (
@@ -122,6 +126,7 @@ class MenuAlacarte extends React.Component {
                   <MenuSidebar
                     dataCategories={dataCategories}
                     getProductByReportNo={this.getProductByReportNo}
+                    langue={langue}
                   />}
                   docked={this.state.sidebarDocked}
                   open={this.state.sidebarOpen}
@@ -143,6 +148,7 @@ class MenuAlacarte extends React.Component {
                 dataProductInReport={dataProductInReport}
                 confirmOrder={this.confirmOrder}
                 showModalAPI={this.showModalAPI}
+                langue={langue}
               />
               <ModalAPIResult
                 show={this.state.showModalApi}
@@ -159,9 +165,9 @@ class MenuAlacarte extends React.Component {
   }
 }
 const mapStateToProps = state => {
-
   return {
-    dataOrders: state.dataOrder
+    dataOrders: state.dataOrder,
+    langue: state.dataTranslation.langue
   }
 }
 export default connect(mapStateToProps,{updateShowCart,getInitialData,getProductByReportNo,postOrder,getAlacarte})(MenuAlacarte)

@@ -44,7 +44,8 @@ class MenuContentAlacarte extends React.Component {
     showModalQuestion: false,
     showModalCart: false,
     productSelected: {},
-    sysInfo: this.props.sysInfo
+    sysInfo: this.props.sysInfo,
+    langue: this.props.langue
   }
   componentDidUpdate(prevProps, prevState) {
     if ((this.props.dataProducts !== null && prevProps.dataProducts === null)
@@ -53,6 +54,7 @@ class MenuContentAlacarte extends React.Component {
     || (this.props.dataQuestions !== null && prevState !== null && this.props.dataQuestions !== prevState.questions)
     || (this.props.dataForcedChoices !== null && prevState !== null && this.props.dataForcedChoices !== prevState.forcedChoices)
     || (this.props.dataProducts !== null && prevState !== null && this.props.dataProducts !== prevState.allProducts)
+    || (this.props.langue !== null && prevState !== null && this.props.langue !== prevState.langue)
     ) {
       this.setState(
         {
@@ -60,7 +62,8 @@ class MenuContentAlacarte extends React.Component {
           products: this.props.dataProductInReport,
           patientSelected: this.props.patientSelected ,
           questions: this.props.dataQuestions,
-          forcedChoices: this.props.dataForcedChoices
+          forcedChoices: this.props.dataForcedChoices,
+          langue: this.props.langue
         }
       );
     }
@@ -182,7 +185,6 @@ class MenuContentAlacarte extends React.Component {
       }
 
       cart.push(dataPost);
-      console.log('sdjsadgias')
       this.setState({inCart: cart});
 
     }
@@ -422,7 +424,6 @@ class MenuContentAlacarte extends React.Component {
         && this.checkForcedQuestion(forcedQues5, numQUAN5, product.dataQuestion5.Question)
         && this.checkNumChoicesQuestion(numChoices5, numQUAN5, product.dataQuestion5.Question)
       ){
-        console.log('shdg')
         this.setState({inCart: cart})
         this.toggleModal();
       }
@@ -457,7 +458,6 @@ class MenuContentAlacarte extends React.Component {
   }
   handleRemoveCart = item => {
     let cart = this.state.inCart.filter(x=>x.PRODNUM !== item.PRODNUM);
-    console.log('sdbcoahsud')
     this.setState({inCart: cart});
     if(cart.length === 0){
       this.toggleModalCart();
@@ -474,7 +474,6 @@ class MenuContentAlacarte extends React.Component {
     let cart = this.state.inCart;
     let index = cart.findIndex(x=>x.PRODNUM === item.PRODNUM);
     cart[index]["QUAN"] = quan;
-    console.log('kdsbgfuisad')
     this.setState({inCart: cart});
   }
   renderCart = cart => {
@@ -492,7 +491,8 @@ class MenuContentAlacarte extends React.Component {
             </div>
             <CardBody>
               <div className="item-name"style={{marginTop: "2rem"}}>
-                <span>{product.ProductName}</span>
+                <span>{this.formatLangueProductName(product)}</span>
+
                 <div className="item-quantity">
                   <NumericInput
                     min={1}
@@ -506,6 +506,7 @@ class MenuContentAlacarte extends React.Component {
                     }}
                   />
                 </div>
+
                 <p className="offers">{formatVND(item.COSTEACH)}</p>
               </div>
             </CardBody>
@@ -518,7 +519,7 @@ class MenuContentAlacarte extends React.Component {
                 <span className="align-middle ml-25">Remove</span>
               </div>
               <div className="cart">
-                <span className="align-middle ml-25">Change</span>
+                <span className="align-middle ml-25">Note</span>
               </div>
             </div>
           </div>
@@ -555,6 +556,36 @@ class MenuContentAlacarte extends React.Component {
             </div>
     )
   }
+  formatLangueProductName = (product) => {
+    if(product.Tranlations.length === 0){
+      return product.ProductName
+    }
+    let filter = product.Tranlations.find(x=>x.TranslationID === this.state.langue.TranslationID);
+    if(typeof filter === 'undefined'){
+      return product.ProductName
+    }
+    return filter.TranslationText
+  }
+  formatLangueProductDescript = (product) => {
+    if(product.Tranlations.length === 0){
+      return null
+    }
+    let filter = product.Tranlations.find(x=>x.TranslationID === this.state.langue.TranslationID);
+    if(typeof filter === 'undefined'){
+      return null
+    }
+    return filter.Descript
+  }
+  formatLangueQuestion = (question) => {
+    if(question.Tranlations.length === 0){
+      return question.Question
+    }
+    let filter = question.Tranlations.find(x=>x.TranslationID === this.state.langue.TranslationID);
+    if(typeof filter === 'undefined'){
+      return question.Question
+    }
+    return filter.TranslationText
+  }
   render() {
     let {products, patient, loading,productSelected} = this.state
     let renderProducts = products.map((product, i) => {
@@ -572,10 +603,10 @@ class MenuContentAlacarte extends React.Component {
             </div>
             <CardBody>
               <div className="item-name">
-                <Link to="/ecommerce/product-detail">
-                  {" "}
-                  <span>{product.ProductName}</span>
-                </Link>
+                  <span>{this.formatLangueProductName(product)}</span>
+              </div>
+              <div className="item-desc">
+                <p className="item-description">{this.formatLangueProductDescript(product)}</p>
               </div>
               <div className="item-desc">
                 <p className="item-description">{formatVND(product.PriceA)}</p>
@@ -742,7 +773,7 @@ class MenuContentAlacarte extends React.Component {
                       <>
                       <div className="product-categories" >
                         <div className="product-category-title">
-                          <h6 className="filter-title mb-1">{productSelected.dataQuestion1.Question}</h6>
+                          <h6 className="filter-title mb-1">{this.formatLangueQuestion(productSelected.dataQuestion1)}</h6>
                         </div>
                         <ul className="list-unstyled categories-list" key={productSelected.Question1.OptionIndex}>
                           {
@@ -810,7 +841,7 @@ class MenuContentAlacarte extends React.Component {
                       <>
                       <div className="product-categories">
                         <div className="product-category-title">
-                          <h6 className="filter-title mb-1">{productSelected.dataQuestion2.Question}</h6>
+                          <h6 className="filter-title mb-1">{this.formatLangueQuestion(productSelected.dataQuestion2)}</h6>
                         </div>
                         <ul className="list-unstyled categories-list"key={productSelected.Question2.OptionIndex}>
                           {
@@ -872,7 +903,7 @@ class MenuContentAlacarte extends React.Component {
                       <>
                       <div className="product-categories">
                         <div className="product-category-title">
-                          <h6 className="filter-title mb-1">{productSelected.dataQuestion3.Question}</h6>
+                          <h6 className="filter-title mb-1">{this.formatLangueQuestion(productSelected.dataQuestion3)}</h6>
                         </div>
                         <ul className="list-unstyled categories-list"key={productSelected.Question3.OptionIndex}>
                           {
@@ -933,7 +964,7 @@ class MenuContentAlacarte extends React.Component {
                       <>
                       <div className="product-categories">
                         <div className="product-category-title">
-                          <h6 className="filter-title mb-1" >{productSelected.dataQuestion4.Question}</h6>
+                          <h6 className="filter-title mb-1" >{this.formatLangueQuestion(productSelected.dataQuestion4)}</h6>
                         </div>
                         <ul className="list-unstyled categories-list"key={productSelected.Question4.OptionIndex}>
                           {
@@ -995,7 +1026,7 @@ class MenuContentAlacarte extends React.Component {
                       <>
                       <div className="product-categories">
                         <div className="product-category-title">
-                          <h6 className="filter-title mb-1">{productSelected.dataQuestion5.Question}</h6>
+                          <h6 className="filter-title mb-1">{this.formatLangueQuestion(productSelected.dataQuestion5)}</h6>
                         </div>
                         <ul className="list-unstyled categories-list"key={productSelected.Question1.OptionIndex}>
                           {

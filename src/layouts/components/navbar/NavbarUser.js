@@ -17,6 +17,7 @@ import { history } from "../../../history"
 import { IntlContext } from "../../../utility/context/Internationalization"
 import { removeAllSession } from "../../../codes/function"
 import { connect } from "react-redux"
+import {updatelangueSelected} from "../../../redux/actions/app-data/translation"
 
 const handleNavigation = (e, path) => {
   e.preventDefault()
@@ -105,9 +106,11 @@ class NavbarUser extends React.PureComponent {
   }
 
   componentDidMount() {
-    axios.get("/api/main-search/data").then(({ data }) => {
-      this.setState({ suggestions: data.searchResult })
-    })
+    if(this.state.suggestions.length === 0){
+      axios.get("/api/main-search/data").then(({ data }) => {
+        this.setState({ suggestions: data.searchResult })
+      })
+    }
   }
 
   handleNavbarSearch = () => {
@@ -130,16 +133,33 @@ class NavbarUser extends React.PureComponent {
     this.setState({ langDropdown: !this.state.langDropdown })
 
   render() {
+
     return (
       <ul className="nav navbar-nav navbar-nav-user float-right">
         <IntlContext.Consumer>
           {context => {
-            let langArr = {
-              "en" : "English",
-              "de" : "German",
-              "fr" : "French",
-              "pt" : "Portuguese"
-            }
+            let langArr = this.props.dataTranslation.data;
+            let langueSelected = langArr.find(x=>x.TranslationCode === (context.state.locale === 'en' ? 'us' : context.state.locale));
+            {/* if(typeof langueSelected !== 'undefined'){
+              this.props.updatelangueSelected(langueSelected);
+            } */}
+
+            let renderLangue  = this.props.dataTranslation.data.map((el,i) => {
+              return (
+
+              <DropdownItem
+                  tag="a"
+                  onClick={e => {
+                    context.switchLanguage(el.TranslationCode);
+                    this.props.updatelangueSelected(el);
+                  }}
+                  key={i}
+                >
+                  <ReactCountryFlag className="country-flag" countryCode={el.TranslationCode} svg />
+                  <span className="ml-1">{el.TranslationName}</span>
+                </DropdownItem>
+            )
+            })
             return (
               <Dropdown
                 tag="li"
@@ -155,45 +175,18 @@ class NavbarUser extends React.PureComponent {
                   <ReactCountryFlag
                   className="country-flag"
                     countryCode={
-                      context.state.locale === "en"
+                      typeof langueSelected !== 'undefined' && langueSelected.TranslationCode === "en"
                         ? "us"
-                        : context.state.locale
+                        : typeof langueSelected !== 'undefined' ? langueSelected.TranslationCode : "us"
                     }
                     svg
                   />
                   <span className="d-sm-inline-block d-none text-capitalize align-middle ml-50">
-                    {langArr[context.state.locale]}
+                    {typeof langueSelected !== 'undefined' ? langueSelected.TranslationName : ""}
                   </span>
                 </DropdownToggle>
                 <DropdownMenu right>
-                  <DropdownItem
-                    tag="a"
-                    onClick={e => context.switchLanguage("en")}
-                  >
-                    <ReactCountryFlag className="country-flag" countryCode="us" svg />
-                    <span className="ml-1">English</span>
-                  </DropdownItem>
-                  <DropdownItem
-                    tag="a"
-                    onClick={e => context.switchLanguage("fr")}
-                  >
-                    <ReactCountryFlag className="country-flag" countryCode="fr" svg />
-                    <span className="ml-1">French</span>
-                  </DropdownItem>
-                  <DropdownItem
-                    tag="a"
-                    onClick={e => context.switchLanguage("de")}
-                  >
-                    <ReactCountryFlag className="country-flag" countryCode="de" svg />
-                    <span className="ml-1">German</span>
-                  </DropdownItem>
-                  <DropdownItem
-                    tag="a"
-                    onClick={e => context.switchLanguage("pt")}
-                  >
-                    <ReactCountryFlag className="country-flag" countryCode="pt" svg />
-                    <span className="ml-1">Portuguese</span>
-                  </DropdownItem>
+                {renderLangue}
                 </DropdownMenu>
               </Dropdown>
             )
@@ -355,7 +348,8 @@ class NavbarUser extends React.PureComponent {
 const mapStateToProps = state => {
   return {
     user: state.auth,
-    navbar: state.navbar
+    navbar: state.navbar,
+    dataTranslation: state.dataTranslation
   }
 }
-export default connect(mapStateToProps)(NavbarUser)
+export default connect(mapStateToProps, {updatelangueSelected})(NavbarUser)

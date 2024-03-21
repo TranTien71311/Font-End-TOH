@@ -15,7 +15,7 @@ const navigationConfig = [
   },
   {
     id: "patientOrders",
-    title: "Patient Orders",
+    title: "IPD Menu",
     type: "item",
     icon: <Icon.Tablet size={20} />,
     permissions: ["PATIENT_ORDERS"],
@@ -24,7 +24,7 @@ const navigationConfig = [
   },
   {
     id: "orderAlacart",
-    title: "Order Alacarte",
+    title: "Alacarte Menu",
     type: "item",
     icon: <Icon.Monitor size={20} />,
     permissions: ["ORDER_ALACARTE"],
@@ -149,6 +149,15 @@ const navigationConfig = [
     showCart: false
   },
   {
+    id: "categorys",
+    title: "Categorys",
+    type: "item",
+    icon: <Icon.Copy size={20} />,
+    permissions: ["SETUP_CATEGORY_PATIENTS"],
+    navLink: "/misc/coming-soon",
+    showCart: false
+  },
+  {
     id: "subCategorys",
     title: "Sub Categorys",
     type: "item",
@@ -158,11 +167,11 @@ const navigationConfig = [
     showCart: false
   },
   {
-    id: "patientMenuSettings",
-    title: "Menu Settings",
+    id: "foods",
+    title: "Foods",
     type: "item",
-    icon: <Icon.Layout size={20} />,
-    permissions: ["SETUP_MENU_PATIENTS"],
+    icon: <Icon.Droplet size={20} />,
+    permissions: ["SETUP_FOOD"],
     navLink: "/misc/coming-soon",
     showCart: false
   },
@@ -181,15 +190,6 @@ const navigationConfig = [
     type: "item",
     icon: <Icon.Menu size={20} />,
     permissions: ["SETUP_ROOM"],
-    navLink: "/misc/coming-soon",
-    showCart: false
-  },
-  {
-    id: "foods",
-    title: "Foods",
-    type: "item",
-    icon: <Icon.Droplet size={20} />,
-    permissions: ["SETUP_FOOD"],
     navLink: "/misc/coming-soon",
     showCart: false
   },

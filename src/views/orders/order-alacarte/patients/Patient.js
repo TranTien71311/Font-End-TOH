@@ -2,14 +2,7 @@ import React from "react"
 import {
   FormGroup,
   Input,
-  UncontrolledTooltip,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Table,
-  Spinner
+  UncontrolledTooltip
 } from "reactstrap"
 import { Menu, Search, Info, ShoppingCart, Clock } from "react-feather"
 import PerfectScrollbar from "react-perfect-scrollbar"
@@ -18,11 +11,14 @@ import {colorPrimary} from "../../../../assets/color"
 import { history } from "../../../../history"
 import "../../../../assets/scss/pages/users.scss"
 import {formatVND} from "../../../../codes/function"
+import HistoryOrderModal from "./HistoryOrderModal";
+import InfoModal from "./InfoModal"
+import TransactionDetailModal from "./TransactionDetailModal";
 
 class Patient extends React.Component {
   state = {
     patients: this.props.dataPatients,
-    patientSelected: "",
+    patientSelected: {},
     value: "",
     showModalHistory: false,
     showModalInfo: false,
@@ -116,6 +112,14 @@ class Patient extends React.Component {
         </tr>
       </tbody>
     )
+  }
+  handleClickShiped = (isLoading, el) => {
+    this.setState({loadingUpdate: isLoading, transactionSelected: el});
+    this.handleUpdateTrans(el);
+  }
+  handleClickDetail = async (el) => {
+    await this.props.getTransactionDetail(el.TransactionCode);
+    this.toggleModalDetail()
   }
   render() {
     const { patients, patientSelected, value } = this.state
@@ -212,7 +216,6 @@ class Patient extends React.Component {
                       onClick={()=>{
                         this.setState({patientSelected: patient})
                         this.toggleModalInfo()
-                        console.log(patient)
                       }}
                     />
                     <UncontrolledTooltip
@@ -275,218 +278,26 @@ class Patient extends React.Component {
             </div>
           </div>
         </div>
-        <Modal
-          isOpen={this.state.showModalHistory}
-          toggle={this.toggleModalHistory}
-          className="modal-dialog-centered modal-lg"
-          >
-            <ModalHeader
-              toggle={this.toggleModalHistory}
-              className={"bg-info"}
-            >
-            History Orders
-            </ModalHeader>
-            <ModalBody className="modal-dialog-centered ecommerce-application">
-              {this.state.inHistory.length > 0 ?
-               (
-                <Table responsive bordered>
-                  <thead>
-                    <tr>
-                      <th>Status</th>
-                      <th>Transaction</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                    this.state.inHistory.map((el,i) => {
-                      return (
-                        <tr key={i}>
-                          <td>{el.Status === 0 ? "New" : "Shiped"}</td>
-                          <td>Transaction: {el.TransactionCode} , Time Order: {Moment(el.TimeOrder).format("MM-DD-YYYY HH:mm")}</td>
-                          <td className="text-left">
-                          <Button.Ripple outline color= "primary mr-1"
-                          onClick={ async () => {
-                            await this.props.getTransactionDetail(el.TransactionCode);
-                            console.log(this.state.transactionDetail)
-                            this.toggleModalDetail()
-                          }}>
-                            Detail
-                          </Button.Ripple>
-                          {
-                            el.Status === 0 ?
-                            (
-
-                              <Button.Ripple color= "success" onClick={
-                                () => {
-                                  this.setState({loadingUpdate: true, transactionSelected: el});
-                                  this.handleUpdateTrans(el);
-                                }}>
-                                {(this.state.loadingUpdate && this.state.transactionSelected.TransactionCode === el.TransactionCode) ?<Spinner color="white" size="sm" type="grow" /> : ""}
-                                Shiped
-                              </Button.Ripple>
-                            )
-                            : null
-                          }
-
-                          </td>
-                        </tr>
-                      )
-                    })
-                    }
-
-                  </tbody>
-                </Table>
-               ) : "No History Order"
-              }
-
-            </ModalBody>
-            <ModalFooter>
-              <Button.Ripple outline color= "danger" onClick={this.toggleModalHistory}>
-                Close
-              </Button.Ripple>{" "}
-            </ModalFooter>
-        </Modal>
-        <Modal
-          isOpen={this.state.showModalInfo}
-          toggle={this.toggleModalInfo}
-          className="modal-dialog-centered"
-          >
-            <ModalHeader
-              toggle={this.toggleModalInfo}
-              className={"bg-info"}
-            >
-            Information
-            </ModalHeader>
-            <ModalBody className="modal-dialog-centered ecommerce-application">
-            {
-
-              Object.keys(this.state.patientSelected).length ?
-              (
-                <div className="users-page-view-table">
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                     Full name:
-                    </div>
-                    <div>{this.state.patientSelected.PatientFullName}</div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                      DoB:
-                    </div>
-                    <div>{Moment(this.state.patientSelected.DoB).format("MM-DD-YYYY")}</div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Nationality:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.Nationality}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Primary doctor:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.PrimaryDoctor}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Length of stay:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.LengthOfStay}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Do not order from:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.DoNotOrderFrom != null ? Moment(this.state.patientSelected.DoNotOrderFrom).format("MM-DD-YYYY HH:mm") : ""}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Do not order to:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.DoNotOrderTo != null ? Moment(this.state.patientSelected.DoNotOrderTo).format("MM-DD-YYYY HH:mm") : ""}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Fasting from:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.FastingFrom != null ? Moment(this.state.patientSelected.FastingFrom).format("MM-DD-YYYY HH:mm") : ""}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Fasting to:
-                    </div>
-                    <div className="text-truncate">
-                      <span>{this.state.patientSelected.FastingTo != null ? Moment(this.state.patientSelected.FastingTo).format("MM-DD-YYYY HH:mm") : ""}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex user-info">
-                    <div className="user-info-title font-weight-bold">
-                    Dietary:
-                    </div>
-                    <div className="text-truncate">
-                      <span>Ít muối</span>
-                    </div>
-                  </div>
-                </div>
-              ): null
-            }
-
-            </ModalBody>
-            <ModalFooter>
-              <Button.Ripple outline color= "danger" onClick={this.toggleModalInfo}>
-                Close
-              </Button.Ripple>{" "}
-            </ModalFooter>
-        </Modal>
-        <Modal
-          isOpen={this.state.showModalDetail}
-          toggle={this.toggleModalDetail}
-          className="modal-dialog-centered modal-lg"
-          >
-            <ModalHeader
-              toggle={this.toggleModalDetail}
-              className={"bg-info"}
-            >
-            Transaction Detail
-            </ModalHeader>
-            <ModalBody className="modal-dialog-centered ecommerce-application">
-              {this.state.inHistory.length > 0 ?
-               (
-                <Table responsive bordered>
-                  <thead>
-                    <tr>
-                      <th>Quantity</th>
-                      <th>Product</th>
-                      <th>Price</th>
-                      <th>VAT + SVC</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  {this.renderTransactionDetail(this.state.transactionDetail)}
-                </Table>
-               ) : "No History Order"
-              }
-
-            </ModalBody>
-            <ModalFooter>
-              <Button.Ripple outline color= "danger" onClick={this.toggleModalDetail}>
-                Close
-              </Button.Ripple>{" "}
-            </ModalFooter>
-        </Modal>
+        <HistoryOrderModal
+          showModalHistory={this.state.showModalHistory}
+          inHistory={this.state.inHistory}
+          loadingUpdate={this.state.loadingUpdate}
+          transactionSelected={this.state.transactionSelected}
+          toggleModalHistory={this.toggleModalHistory}
+          handleClickDetail={this.handleClickDetail}
+        />
+        <InfoModal
+          showModalInfo={this.state.showModalInfo}
+          toggleModalInfo={this.toggleModalInfo}
+          patientSelected={patientSelected}
+        />
+        <TransactionDetailModal
+          showModalDetail={this.state.showModalDetail}
+          toggleModalDetail={this.toggleModalDetail}
+          inHistory={this.state.inHistory}
+          transactionDetail={this.props.transactionDetail}
+          renderTransactionDetail={this.renderTransactionDetail}
+        />
       </div>
 
     )

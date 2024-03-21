@@ -1,30 +1,39 @@
 import React from "react"
-import { Card, CardBody, Button } from "reactstrap"
-import Slider from "rc-slider"
+import { Card, CardBody } from "reactstrap"
 import "rc-slider/assets/index.css"
 import "../../../assets/scss/plugins/extensions/slider.scss"
 import "../../../assets/scss/pages/app-chat.scss"
 import PerfectScrollbar from "react-perfect-scrollbar"
-const createSliderWithTooltip = Slider.createSliderWithTooltip
-const Range = createSliderWithTooltip(Slider.Range)
 
 
 class Category extends React.Component {
   state = {
     categories: this.props.dataCategories,
-    categorySelected: this.props.dataCategories[0].ReportNo
+    categorySelected: this.props.dataCategories[0].ReportNo,
+    langue: this.props.langue
   }
   componentDidUpdate(prevProps, prevState) {
     if ((this.props.dataCategories !== null && prevProps.dataCategories === null)
     || (this.props.dataCategories !== null && prevState !== null && this.props.dataCategories !== prevState.categories)
+    || (this.props.langue !== null && prevState !== null && this.props.langue !== prevState.langue)
     ) {
       let selected = ""
       if(this.props.dataCategories.length !== 0){
         selected = this.props.dataCategories[0].ReportNo
       }
-      this.setState({ categories: this.props.dataCategories, categorySelected: selected });
+      this.setState({ categories: this.props.dataCategories, categorySelected: selected, langue:  this.props.langue});
       this.props.getProductByReportNo(this.props.dataCategories[0].ReportNo);
     }
+  }
+  formatLangueCategoryName = (category) => {
+    if(category.Translations.length === 0){
+      return category.ReportName
+    }
+    let filter = category.Translations.find(x=>x.TranslationID === this.state.langue.TranslationID);
+    if(typeof filter === 'undefined'){
+      return category.ReportName
+    }
+    return filter.TranslationText
   }
   render() {
     let {categories,categorySelected} = this.state
@@ -51,7 +60,7 @@ class Category extends React.Component {
               <span
               className={"text-bold-600 mb-0 ml-1 " + (categorySelected === category.ReportNo ? "text-primary" : "")}
               >
-                {category.ReportName}
+                {this.formatLangueCategoryName(category)}
               </span>
             </div>
           </li>

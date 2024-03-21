@@ -5,16 +5,15 @@ import {pushAPIPOS} from "../../../../Api/POSApi/api"
 export const getInitialData = () => {
   return async dispatch => {
     await Promise.all([
-      fetchAPI("/api/POSReportCats?IsActive=true"),
+      fetchAPI("/api/POSReportCats?IsActive=true&IsPublic=true"),
       fetchAPI("/api/POSQuestions?IsActive=true"),
       fetchAPI("/api/POSForcedChoices?IsActive=true"),
       fetchAPI("/api/POSSysInfo"),
-      fetchAPI("/api/POSProducts?IsActive=true&PageSize=10000")
+      fetchAPI("/api/POSProducts?IsActive=true&PageSize=10000&IsPublic=true")
     ]).then(
       response => {
         let i = 0;
         let types = ["APPEND_DATA_CATEGORY_ALACARTE","APPEND_DATA_QUESTION_ALACARTE","APPEND_DATA_FORCEDCHOICE_ALACARTE","APPEND_DATA_SYSINFO_ALACARTE","APPEND_DATA_PRODUCT_ALACARTE"]
-        console.log(response)
         for (const result of response) {
           if(result.Status !== 200){
             dispatch({type: "SHOW_ERROR_API_ORDER_ALACARTE", status: result.Status, message: result.Message})
